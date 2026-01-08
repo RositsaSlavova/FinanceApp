@@ -1,6 +1,7 @@
 package bg.tu_varna.si.screens
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -8,22 +9,21 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import bg.tu_varna.si.ui.theme.FinanceTheme
+import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.ui.graphics.drawscope.Stroke
 
 // --------- UI State ---------
 data class HomeUiState(
@@ -57,50 +57,59 @@ enum class TxnIcon { WORK, CART, HOME }
 // --------- Screen ---------
 @Composable
 fun HomeScreen(
-    state: HomeUiState,
+    state: HomeUiState = HomeUiState(),
     onNotificationsClick: () -> Unit = {},
     onPeriodChange: (PeriodTab) -> Unit = {},
     onRevealClick: () -> Unit = {}
 ) {
+    val turquoise = Color(0xFF1DD1A1)
+    val lightBg = Color(0xFFE8F8F5)
+    val purple = Color(0xFF667EEA)
+
     val scrollState = rememberScrollState()
 
-    Scaffold(
-        bottomBar = { BottomNavigationBar() }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
-                .verticalScroll(scrollState)
-                .padding(paddingValues)
-                .padding(bottom = 0.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(turquoise)
+            .verticalScroll(scrollState)
+    ) {
+        // Header
+        Header(state.greetingTitle, state.greetingSubtitle, onNotificationsClick)
+
+        Spacer(Modifier.height(16.dp))
+
+        // Balance Row
+        BalanceRow(state.totalBalance, state.totalExpense, state.amountsHidden, purple)
+
+        Spacer(Modifier.height(16.dp))
+
+        // Progress Bar
+        ProgressSection(state.budgetSpentPercent, state.budgetLimit, state.amountsHidden)
+
+        Spacer(Modifier.height(12.dp))
+
+        // БЕЛИЯТ SECTION ЗАПОЧВА ТУК (веднага след check message)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            color = lightBg,
+            shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
         ) {
-            Header(state.greetingTitle, state.greetingSubtitle, onNotificationsClick)
-
-            BalanceRow(state.totalBalance, state.totalExpense, state.amountsHidden, "$")
-
-            BudgetProgress(state.budgetSpentPercent, state.budgetLimit, state.amountsHidden, "$")
-
-            InfoLine("${state.budgetSpentPercent}% Of Your Expenses, Looks Good.")
-
-            Spacer(Modifier.height(20.dp))
-
-            WeeklyCard(state.amountsHidden, "$")
-
-            Spacer(Modifier.height(24.dp))
-
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                color = MaterialTheme.colorScheme.background,
-                shape = RoundedCornerShape(topStart = 36.dp, topEnd = 36.dp)
+            Column(
+                modifier = Modifier.padding(top = 20.dp, bottom = 100.dp)
             ) {
-                Column(modifier = Modifier.padding(top = 24.dp, bottom = 24.dp)) {
-                    PeriodSelector(state.selectedPeriod, onPeriodChange)
-                    Spacer(Modifier.height(16.dp))
-                    TransactionsList(state.recentTransactions, state.amountsHidden, "$")
-                    Spacer(Modifier.height(80.dp))
-                }
+                // Savings Card (вече Е В БЕЛИЯ SECTION)
+                WeeklySavingsCard(state.amountsHidden)
+
+                Spacer(Modifier.height(20.dp))
+
+                // Period Tabs
+                PeriodTabs(state.selectedPeriod, turquoise, lightBg, onPeriodChange)
+
+                Spacer(Modifier.height(20.dp))
+
+                // Transactions List
+                TransactionsList(state.recentTransactions, state.amountsHidden)
             }
         }
     }
@@ -112,305 +121,341 @@ private fun Header(title: String, subtitle: String, onNotificationsClick: () -> 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 20.dp),
+            .padding(horizontal = 20.dp)
+            .padding(top = 48.dp, bottom = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column(modifier = Modifier.weight(1f)) {
+        Column {
             Text(
                 title,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onPrimary,
-                fontWeight = FontWeight.Bold
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
             )
+            Spacer(Modifier.height(4.dp))  // НАМАЛЕНО от 2dp на 4dp за по-естествен вид
             Text(
                 subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.7f)
+                fontSize = 14.sp,
+                color = Color.Black.copy(alpha = 0.7f)  // По-тъмен за четливост
             )
         }
+
         IconButton(
             onClick = onNotificationsClick,
             modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.3f))
+                .size(50.dp)
+                .background(Color.White, CircleShape)
         ) {
             Icon(
-                Icons.Filled.Notifications,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onPrimary
+                Icons.Outlined.Notifications,
+                contentDescription = "Notifications",
+                tint = Color.Black,
+                modifier = Modifier.size(26.dp)
             )
         }
     }
 }
 
 @Composable
-private fun BalanceRow(totalBalance: Double, totalExpense: Double, hidden: Boolean, currency: String) {
+private fun BalanceRow(
+    totalBalance: Double,
+    totalExpense: Double,
+    hidden: Boolean,
+    purple: Color
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        BalanceCard(
-            "Total Balance",
-            formatMoney(totalBalance, currency, hidden),
-            false,
-            modifier = Modifier.weight(1f)
-        )
-        BalanceCard(
-            "Total Expense",
-            formatMoney(-totalExpense, currency, hidden),
-            true,
-            modifier = Modifier.weight(1f)
-        )
-    }
-}
-
-@Composable
-private fun BalanceCard(label: String, value: String, isExpense: Boolean, modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(if (isExpense) Color(0xFF1E9B8E) else Color(0xFF2DD0B4))
-            .padding(12.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                imageVector = if (isExpense) Icons.Filled.ShoppingCart else Icons.Filled.AccountCircle,
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(16.dp)
-            )
-            Spacer(Modifier.width(6.dp))
+        // Total Balance
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    Icons.Outlined.ArrowUpward,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),  // По-голяма икона
+                    tint = Color.Black.copy(alpha = 0.6f)  // По-тъмна
+                )
+                Text(
+                    "Total Balance",
+                    fontSize = 13.sp,
+                    color = Color.Black.copy(alpha = 0.6f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
             Text(
-                label,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.9f)
+                formatMoney(totalBalance, "$", hidden),
+                fontSize = 28.sp,  // По-голям шрифт
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
         }
-        Spacer(Modifier.height(4.dp))
-        Text(
-            value,
-            style = MaterialTheme.typography.titleLarge,
-            color = if (isExpense) Color(0xFF00D4FF) else Color.White,
-            fontWeight = FontWeight.Bold
+
+        // Vertical divider
+        Box(
+            modifier = Modifier
+                .width(1.dp)
+                .height(70.dp)
+                .background(Color.White.copy(alpha = 0.4f))
         )
+
+        // Total Expense
+        Column(modifier = Modifier.weight(1f)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    Icons.Outlined.ArrowDownward,
+                    contentDescription = null,
+                    modifier = Modifier.size(20.dp),  // По-голяма икона
+                    tint = Color.Black.copy(alpha = 0.6f)  // По-тъмна
+                )
+                Text(
+                    "Total Expense",
+                    fontSize = 13.sp,
+                    color = Color.Black.copy(alpha = 0.6f)
+                )
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(
+                "-${formatMoney(totalExpense, "$", hidden)}",
+                fontSize = 28.sp,  // По-голям шрифт
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF667EEA)
+            )
+        }
     }
 }
 
 @Composable
-private fun BudgetProgress(
+private fun ProgressSection(
     percent: Int,
     limit: Double,
-    amountsHidden: Boolean,
-    currency: String
+    hidden: Boolean
 ) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color(0xFF1A1A1A))
-                .padding(horizontal = 12.dp, vertical = 8.dp)
-        ) {
-            Text(
-                text = "$percent%",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Box(
-            modifier = Modifier
-                .height(32.dp)
-                .weight(1f)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .fillMaxWidth(percent.coerceIn(0, 100) / 100f)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color(0xFF1A1A1A))
-            )
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Text(
-            text = formatMoney(limit, currency, amountsHidden),
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun InfoLine(text: String) {
-    Row(
-        modifier = Modifier
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(Color.White.copy(alpha = 0.3f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "✓",
-                color = Color.White,
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold
-            )
-        }
-
-        Spacer(Modifier.width(10.dp))
-
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White
-        )
-    }
-}
-
-@Composable
-private fun WeeklyCard(hidden: Boolean, currency: String) {
-    Box(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
     ) {
-        Column(
+        // Progress Bar - ВСИЧКО В ЕДНА ЛИНИЯ
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .background(Color(0xFF2DD0B4))
-                .padding(20.dp)
+                .height(40.dp)
+                .clip(RoundedCornerShape(20.dp))
+                .background(Color.White),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            // Black progress part
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth(percent / 100f)
+                    .clip(RoundedCornerShape(20.dp))
+                    .background(Color.Black),
+                contentAlignment = Alignment.Center
             ) {
-                // Left side - Savings icon and text
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(80.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.3f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.AccountCircle,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(48.dp)
-                        )
-                    }
-                    Spacer(Modifier.height(8.dp))
+                if (percent > 15) {  // Показвай процента само ако има място
                     Text(
-                        "Savings",
-                        color = Color.White,
+                        "$percent%",
+                        fontSize = 14.sp,
                         fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Text(
-                        "On Goals",
-                        color = Color.White.copy(alpha = 0.8f),
-                        style = MaterialTheme.typography.bodyMedium
+                        color = Color.White
                     )
                 }
+            }
 
-                // Vertical divider
+            // White remaining part with limit amount
+            Box(
+                modifier = Modifier
+                    .fillMaxHeight()
+                    .weight(1f),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                Text(
+                    formatMoney(limit, "$", hidden),
+                    fontSize = 14.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            }
+        }
+
+        Spacer(Modifier.height(12.dp))
+
+        // Status message
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(
+                Icons.Outlined.CheckBox,
+                contentDescription = null,
+                modifier = Modifier.size(18.dp),  // По-голямо тикче
+                tint = Color.Black
+            )
+            Text(
+                "$percent% Of Your Expenses, Looks Good.",
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Normal,
+                color = Color.Black
+            )
+        }
+    }
+}
+
+@Composable
+private fun WeeklySavingsCard(hidden: Boolean) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFF1DD1A1))
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Left - Car icon and labels
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.width(90.dp)
+            ) {
+                // Car icon с наситен син кръг
                 Box(
                     modifier = Modifier
-                        .width(2.dp)
-                        .height(100.dp)
-                        .background(Color.White.copy(alpha = 0.3f))
+                        .size(80.dp)
+                        .drawBehind {
+                            val strokeWidth = 8.dp.toPx()
+                            // Рисуваме първата половина (от 90° до 270°)
+                            drawArc(
+                                color = Color.White,
+                                startAngle = 90f,
+                                sweepAngle = 180f,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                            )
+                            // Рисуваме втората половина (от 270° до 90°)
+                            drawArc(
+                                color = Color(0xFF667EEA),
+                                startAngle = 270f,
+                                sweepAngle = 180f,
+                                useCenter = false,
+                                style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
+                            )
+                        }
+                        .background(Color(0xFF1DD1A1), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        Icons.Outlined.DirectionsCar,
+                        contentDescription = null,
+                        modifier = Modifier.size(44.dp),
+                        tint = Color.Black
+                    )
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    "Savings",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
+                Text(
+                    "On Goals",
+                    fontSize = 13.sp,
+                    color = Color.Black.copy(alpha = 0.6f)
+                )
+            }
+
+            // Vertical divider
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .height(130.dp)
+                    .background(Color.White.copy(alpha = 0.5f))
+            )
+
+            // Right - Stats (икона ВЛЯВО, текст+сума ВДЯСНО)
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // Revenue - икона вляво, текст и сума вдясно
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Outlined.Inventory2,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = Color.Black
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Revenue Last Week",
+                            fontSize = 11.sp,
+                            color = Color.Black
+                        )
+                        Spacer(Modifier.height(0.5.dp))
+                        Text(
+                            formatMoney(4000.0, "$", hidden),
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Black
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Divider(
+                    color = Color.White.copy(alpha = 0.5f),
+                    thickness = 1.dp
                 )
 
-                // Right side - Revenue and Food
-                Column(
-                    modifier = Modifier.weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                Spacer(Modifier.height(16.dp))
+
+                // Food - икона вляво, текст и сума вдясно
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.ShoppingCart,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                "Revenue Last Week",
-                                color = Color.White.copy(alpha = 0.9f),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
+                    Icon(
+                        Icons.Outlined.Restaurant,
+                        contentDescription = null,
+                        modifier = Modifier.size(40.dp),
+                        tint = Color.Black
+                    )
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            "Food Last Week",
+                            fontSize = 11.sp,
+                            color = Color.Black
+                        )
+                        Spacer(Modifier.height(0.5.dp))
+                        Text(
+                            "-${formatMoney(100.0, "$", hidden)}",  // С МИНУС
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF667EEA)  // Светло зелен цвят
+                        )
                     }
-                    Text(
-                        formatMoney(4000.0, currency, hidden),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(1.dp)
-                            .background(Color.White.copy(alpha = 0.3f))
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.Filled.Home,
-                                contentDescription = null,
-                                tint = Color.White,
-                                modifier = Modifier.size(24.dp)
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                "Food Last Week",
-                                color = Color.White.copy(alpha = 0.9f),
-                                style = MaterialTheme.typography.bodySmall
-                            )
-                        }
-                    }
-                    Text(
-                        formatMoney(-100.0, currency, hidden),
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.titleMedium
-                    )
                 }
             }
         }
@@ -418,208 +463,147 @@ private fun WeeklyCard(hidden: Boolean, currency: String) {
 }
 
 @Composable
-private fun PeriodSelector(
+private fun PeriodTabs(
     selected: PeriodTab,
+    turquoise: Color,
+    lightBg: Color,
     onSelected: (PeriodTab) -> Unit
 ) {
+    var selectedTab by remember { mutableStateOf(2) }
+    val tabs = listOf("Daily", "Weekly", "Monthly")
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color(0xFFE8F5F3))
-            .padding(6.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+            .clip(RoundedCornerShape(30.dp))
+            .background(Color.White)
+            .padding(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        PeriodChip(
-            text = "Daily",
-            selected = selected == PeriodTab.DAILY
-        ) { onSelected(PeriodTab.DAILY) }
-
-        PeriodChip(
-            text = "Weekly",
-            selected = selected == PeriodTab.WEEKLY
-        ) { onSelected(PeriodTab.WEEKLY) }
-
-        PeriodChip(
-            text = "Monthly",
-            selected = selected == PeriodTab.MONTHLY
-        ) { onSelected(PeriodTab.MONTHLY) }
-    }
-}
-
-@Composable
-private fun PeriodChip(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val backgroundColor =
-        if (selected) Color(0xFF24D0B1)
-        else Color.Transparent
-
-    val textColor =
-        if (selected) Color.White
-        else Color(0xFF666666)
-
-    Box(
-        modifier = Modifier
-            .clip(RoundedCornerShape(22.dp))
-            .background(backgroundColor)
-            .clickable { onClick() }
-            .padding(horizontal = 24.dp, vertical = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = textColor,
-            fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-            style = MaterialTheme.typography.bodyMedium
-        )
+        tabs.forEachIndexed { index, title ->
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .clip(RoundedCornerShape(26.dp))
+                    .background(
+                        if (selectedTab == index) turquoise else Color.Transparent
+                    )
+                    .clickable { selectedTab = index }
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    title,
+                    fontSize = 14.sp,
+                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
+                    color = if (selectedTab == index) Color.Black else Color.Black.copy(alpha = 0.5f)
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun TransactionsList(
     transactions: List<UiTransaction>,
-    hidden: Boolean,
-    currency: String
+    hidden: Boolean
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        transactions.forEach {
-            TransactionRow(it, hidden, currency)
-            if (it != transactions.last()) {
-                Spacer(Modifier.height(12.dp))
+        transactions.forEach { tx ->
+            TransactionItem(tx, hidden)
+        }
+    }
+}
+
+@Composable
+private fun TransactionItem(tx: UiTransaction, hidden: Boolean) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(14.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Box(
+                modifier = Modifier
+                    .size(52.dp)
+                    .background(
+                        when (tx.icon) {
+                            TxnIcon.WORK -> Color(0xFF4A90E2)
+                            TxnIcon.CART -> Color(0xFF4A90E2)
+                            TxnIcon.HOME -> Color(0xFF0066FF)
+                        },
+                        RoundedCornerShape(14.dp)
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    when (tx.icon) {
+                        TxnIcon.WORK -> Icons.Outlined.Payments
+                        TxnIcon.CART -> Icons.Outlined.ShoppingCart
+                        TxnIcon.HOME -> Icons.Outlined.Home
+                    },
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                    tint = Color.White
+                )
+            }
+
+            // Title and date
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    tx.title,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Black
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    tx.subtitle,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+            }
+
+            // Tag and amount
+            Column(horizontalAlignment = Alignment.End) {
+                Text(
+                    tx.tag,
+                    fontSize = 12.sp,
+                    color = Color.Black.copy(alpha = 0.5f)
+                )
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    if (tx.amount < 0) "-${formatMoney(kotlin.math.abs(tx.amount), "$", hidden)}"
+                    else formatMoney(tx.amount, "$", hidden),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.Black
+                )
             }
         }
     }
 }
 
-@Composable
-private fun TransactionRow(tx: UiTransaction, hidden: Boolean, currency: String) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White)
-            .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(CircleShape)
-                .background(
-                    when (tx.icon) {
-                        TxnIcon.WORK -> Color(0xFF4D9EFF)
-                        TxnIcon.CART -> Color(0xFF4D9EFF)
-                        TxnIcon.HOME -> Color(0xFF4D9EFF)
-                    }
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = when (tx.icon) {
-                    TxnIcon.WORK -> Icons.Filled.AccountCircle
-                    TxnIcon.CART -> Icons.Filled.ShoppingCart
-                    TxnIcon.HOME -> Icons.Filled.Home
-                },
-                contentDescription = null,
-                tint = Color.White,
-                modifier = Modifier.size(28.dp)
-            )
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                tx.title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = Color.Black,
-                fontWeight = FontWeight.SemiBold
-            )
-            Text(
-                tx.subtitle,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color(0xFF4D9EFF)
-            )
-        }
-
-        Spacer(Modifier.width(12.dp))
-
-        Column(horizontalAlignment = Alignment.End) {
-            Text(
-                tx.tag,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.Gray
-            )
-            Text(
-                formatMoney(tx.amount, currency, hidden),
-                color = if (tx.amount < 0) Color(0xFF00D4FF) else Color(0xFF24D0B1),
-                fontWeight = FontWeight.Bold,
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}
-
-@Composable
-private fun BottomNavigationBar() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 16.dp)
-            .clip(RoundedCornerShape(32.dp))
-            .background(Color(0xFFE8F5F3))
-            .padding(vertical = 12.dp, horizontal = 8.dp),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        BottomNavItem(Icons.Filled.Home, true)
-        BottomNavItem(Icons.Filled.ShoppingCart, false)
-        BottomNavItem(Icons.Filled.AccountCircle, false)
-        BottomNavItem(Icons.Filled.Notifications, false)
-        BottomNavItem(Icons.Filled.AccountCircle, false)
-    }
-}
-
-@Composable
-private fun BottomNavItem(icon: androidx.compose.ui.graphics.vector.ImageVector, selected: Boolean) {
-    Box(
-        modifier = Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(if (selected) Color(0xFF24D0B1) else Color.Transparent)
-            .clickable { },
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = if (selected) Color.White else Color.Gray,
-            modifier = Modifier.size(24.dp)
-        )
-    }
-}
-
-// --------- Helpers ---------
+// --------- Helper ---------
 private fun formatMoney(amount: Double, currency: String, hidden: Boolean): String {
     if (hidden) return "•••• $currency"
-    val nf = NumberFormat.getNumberInstance(Locale("bg", "BG")).apply {
+    val nf = NumberFormat.getNumberInstance(Locale.US).apply {
         minimumFractionDigits = 2
         maximumFractionDigits = 2
     }
-    val sign = if (amount < 0) "-" else ""
-    return "$sign${nf.format(kotlin.math.abs(amount))} $currency"
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewHome() {
-    HomeScreen(HomeUiState())
+    return "$currency${nf.format(amount)}"
 }

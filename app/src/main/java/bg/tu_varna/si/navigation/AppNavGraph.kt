@@ -5,6 +5,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,7 +21,7 @@ fun AppRoot() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Home.route // временно; после ще го върнем на Login
+        startDestination = Route.Home.route
     ) {
         composable(Route.Login.route) {
             LoginScreen()
@@ -47,33 +48,26 @@ private fun MainScaffold(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                bottomNavItems.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) }
-                    )
+            ModernBottomBar(
+                currentRoute = route,
+                onNavigate = { destination ->
+                    navController.navigate(destination) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-            }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = { navController.navigate(Route.AddTransaction.route) },
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = Color(0xFF1DD1A1),
                 shape = RoundedCornerShape(20.dp)
             ) {
-                Text("+", fontSize = 22.sp, fontWeight = FontWeight.Bold)
+                Text("+", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
         }
     ) { padding ->
@@ -82,8 +76,7 @@ private fun MainScaffold(navController: NavHostController) {
                 Route.Home.route -> {
                     HomeScreen(
                         state = HomeUiState(amountsHidden = false),
-                        onNotificationsClick = { navController.navigate(Route.Notifications.route) },
-                        onRevealClick = { /* по-късно biometric */ }
+                        onNotificationsClick = { navController.navigate(Route.Notifications.route) }
                     )
                 }
                 Route.Transactions.route -> TransactionsScreen()
@@ -91,6 +84,38 @@ private fun MainScaffold(navController: NavHostController) {
                 Route.Categories.route -> CategoriesScreen()
                 else -> HomeScreen(state = HomeUiState())
             }
+        }
+    }
+}
+
+@Composable
+private fun ModernBottomBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit
+) {
+    NavigationBar(
+        containerColor = Color(0xFFE8F8F5),
+        tonalElevation = 0.dp
+    ) {
+        bottomNavItems.forEach { item ->
+            val selected = currentRoute == item.route
+
+            NavigationBarItem(
+                selected = selected,
+                onClick = { onNavigate(item.route) },
+                icon = {
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.label,
+                        tint = if (selected) Color(0xFF1DD1A1) else Color.Black.copy(alpha = 0.5f)
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = Color(0xFF1DD1A1),
+                    unselectedIconColor = Color.Black.copy(alpha = 0.5f),
+                    indicatorColor = Color.Transparent
+                )
+            )
         }
     }
 }

@@ -7,7 +7,10 @@ data class AppColors(
     val cardDark: Color,
     val cardText: Color,
     val cardSubtext: Color,
-    val expense: Color
+    val expense: Color,
+    val income: Color,
+    val transactionIconBlue: Color,
+    val transactionIconDarkBlue: Color
 )
 
 val LocalAppColors = staticCompositionLocalOf {
@@ -15,7 +18,10 @@ val LocalAppColors = staticCompositionLocalOf {
         cardDark = Color.Unspecified,
         cardText = Color.Unspecified,
         cardSubtext = Color.Unspecified,
-        expense = Color.Unspecified
+        expense = Color.Unspecified,
+        income = Color.Unspecified,
+        transactionIconBlue = Color.Unspecified,
+        transactionIconDarkBlue = Color.Unspecified
     )
 }
 
@@ -23,6 +29,8 @@ val LightAppColors = AppColors(
     cardDark = FinDarkCard,
     cardText = FinDarkCardText,
     cardSubtext = FinDarkCardSubtext,
-    expense = FinExpenseBlue
+    expense = FinExpenseBlue,
+    income = FinGreen,
+    transactionIconBlue = FinBlue,
+    transactionIconDarkBlue = FinDarkBlue
 )
-
