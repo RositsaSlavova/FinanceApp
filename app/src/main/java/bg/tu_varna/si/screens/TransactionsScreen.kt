@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import bg.tu_varna.si.components.BalanceRow
 import bg.tu_varna.si.components.ProgressSection
 import bg.tu_varna.si.components.TransactionItem
+import bg.tu_varna.si.components.TransactionTopBar
 import bg.tu_varna.si.ui.theme.*
 
 // --------- UI State за Transaction Screen ---------
@@ -52,7 +53,10 @@ fun TransactionScreen(
             .background(FinGreen)
     ) {
         // 1. Top Bar с бутон за връщане
-        TransactionTopBar(onBackClick)
+        TransactionTopBar(
+            title = "Categories",
+            onBackClick = onBackClick
+        )
 
         // 2. Бялата карта с Total Balance (специфична за този екран)
         TotalBalanceWhiteCard(state.totalBalance)
@@ -99,41 +103,6 @@ fun TransactionScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-private fun TransactionTopBar(onBackClick: () -> Unit) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 48.dp, bottom = 12.dp, start = 8.dp, end = 8.dp), // Балансиран padding
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 1. Бутон за връщане
-        IconButton(
-            onClick = onBackClick,
-            modifier = Modifier.size(48.dp) // Фиксиран размер
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back",
-                tint = Color.White
-            )
-        }
-
-        // 2. Заглавие - заема цялото налично пространство и се центрира
-        Text(
-            text = "Transaction",
-            fontSize = 20.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-
-        // 3. Празен елемент със същия размер като IconButton за перфектен баланс
-        Spacer(modifier = Modifier.size(48.dp))
     }
 }
 
