@@ -26,7 +26,11 @@ import java.util.Locale
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
 import bg.tu_varna.si.R
+import bg.tu_varna.si.components.BalanceRow
+import bg.tu_varna.si.components.ProgressSection
+import bg.tu_varna.si.components.TransactionItem
 import bg.tu_varna.si.ui.theme.*
+import bg.tu_varna.si.utils.formatMoney
 
 // --------- UI State ---------
 data class HomeUiState(
@@ -123,59 +127,6 @@ private fun Header(title: String, subtitle: String) {
 }
 
 @Composable
-private fun BalanceRow(totalBalance: Double, totalExpense: Double, hidden: Boolean, purple: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(painterResource(R.drawable.ic_income), null, Modifier.size(20.dp), FinTextSecondary)
-                Text("Total Balance", fontSize = 13.sp, color = FinTextSecondary)
-            }
-            Spacer(Modifier.height(8.dp))
-            Text(formatMoney(totalBalance, "$", hidden), fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
-        }
-
-        Box(modifier = Modifier.width(1.dp).height(70.dp).background(Color.White.copy(alpha = 0.4f)))
-
-        Column(modifier = Modifier.weight(1f)) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Icon(painterResource(R.drawable.ic_expense), null, Modifier.size(20.dp), FinTextSecondary)
-                Text("Total Expense", fontSize = 13.sp, color = FinTextSecondary)
-            }
-            Spacer(Modifier.height(8.dp))
-            Text("-${formatMoney(totalExpense, "$", hidden)}", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = purple)
-        }
-    }
-}
-
-@Composable
-private fun ProgressSection(percent: Int, limit: Double, hidden: Boolean) {
-    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().height(40.dp).clip(RoundedCornerShape(20.dp)).background(Color.White),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier.fillMaxHeight().fillMaxWidth(percent / 100f).clip(RoundedCornerShape(20.dp)).background(Color.Black),
-                contentAlignment = Alignment.Center
-            ) {
-                if (percent > 15) Text("$percent%", fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
-            Box(modifier = Modifier.fillMaxHeight().weight(1f), contentAlignment = Alignment.CenterEnd) {
-                Text(formatMoney(limit, "$", hidden), fontSize = 14.sp, fontWeight = FontWeight.Bold, color = Color.Black, modifier = Modifier.padding(end = 16.dp))
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            Icon(Icons.Outlined.CheckBox, null, Modifier.size(18.dp), Color.Black)
-            Text("$percent% Of Your Expenses, Looks Good.", fontSize = 14.sp, color = Color.Black)
-        }
-    }
-}
-
-@Composable
 private fun WeeklySavingsCard(hidden: Boolean) {
     Card(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp),
@@ -260,110 +211,4 @@ private fun TransactionsList(transactions: List<UiTransaction>, hidden: Boolean)
     Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         transactions.forEach { TransactionItem(it, hidden) }
     }
-}
-
-@Composable
-private fun TransactionItem(tx: UiTransaction, hidden: Boolean) {
-    val turquoise = FinGreen
-    val dateBlue = FinBlue
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 20.dp, vertical = 10.dp),
-        horizontalArrangement = Arrangement.spacedBy(14.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // 1. Икона
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .background(
-                    when (tx.icon) {
-                        TxnIcon.WORK -> FinBlueLight
-                        TxnIcon.CART -> FinBlue
-                        TxnIcon.HOME -> FinDarkBlue
-                    },
-                    RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                painter = painterResource(
-                    id = when (tx.icon) {
-                        TxnIcon.WORK -> R.drawable.ic_salary
-                        TxnIcon.CART -> R.drawable.ic_groceries
-                        TxnIcon.HOME -> R.drawable.ic_rent
-                    }
-                ),
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = Color.White
-            )
-        }
-
-        // 2. Текстов блок - БЕЗ МЯСТО МЕЖДУ ТЕКСТОВЕТЕ
-        Column(
-            modifier = Modifier.weight(1f),
-            // Използваме Arrangement.spacedBy с отрицателна стойност, ако искаш да ги залепиш още повече
-            verticalArrangement = Arrangement.spacedBy((-2).dp)
-        ) {
-            Text(
-                text = tx.title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.Black,
-                maxLines = 1
-            )
-            Text(
-                text = tx.subtitle,
-                fontSize = 8.sp,
-                color = dateBlue,
-                maxLines = 1
-            )
-        }
-
-        // 3. Първа линия
-        Box(
-            modifier = Modifier
-                .width(1.5.dp)
-                .height(30.dp)
-                .background(turquoise)
-        )
-
-        // 4. Таг
-        Text(
-            text = tx.tag,
-            fontSize = 11.sp,
-            fontWeight = FontWeight.Medium,
-            color = Color.Black,
-            modifier = Modifier.widthIn(min = 60.dp),
-            textAlign = TextAlign.Center
-        )
-
-        // 5. Втора линия
-        Box(
-            modifier = Modifier
-                .width(1.5.dp)
-                .height(30.dp)
-                .background(turquoise)
-        )
-
-        // 6. Сума
-        Text(
-            text = if (tx.amount < 0) "-${formatMoney(kotlin.math.abs(tx.amount), "$", hidden)}"
-            else formatMoney(tx.amount, "$", hidden),
-            fontSize = 15.sp,
-            fontWeight = FontWeight.Bold,
-            color = if (tx.amount < 0) dateBlue else Color.Black,
-            modifier = Modifier.widthIn(min = 80.dp),
-            textAlign = TextAlign.End
-        )
-    }
-}
-
-private fun formatMoney(amount: Double, currency: String, hidden: Boolean): String {
-    if (hidden) return "•••• $currency"
-    val nf = NumberFormat.getNumberInstance(Locale.US).apply { minimumFractionDigits = 2; maximumFractionDigits = 2 }
-    return "$currency${nf.format(amount)}"
 }

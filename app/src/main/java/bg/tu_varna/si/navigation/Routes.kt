@@ -9,5 +9,4 @@ sealed class Route(val route: String) {
 
     data object AddTransaction : Route("add_transaction")
     data object Budget : Route("budget")
-    data object Notifications : Route("notifications")
 }

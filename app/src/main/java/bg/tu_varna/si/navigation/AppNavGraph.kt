@@ -61,19 +61,36 @@ private fun MainScaffold(navController: NavHostController) {
                 }
             )
         }
-        // FAB е ПРЕМАХНАТ
     ) { padding ->
+
         Surface(modifier = Modifier.padding(padding)) {
             when (route) {
+
                 Route.Home.route -> {
                     HomeScreen(
                         state = HomeUiState(amountsHidden = false)
                     )
                 }
-                Route.Transactions.route -> TransactionsScreen()
-                Route.Analysis.route -> AnalysisScreen()
-                Route.Categories.route -> CategoriesScreen()
-                else -> HomeScreen(state = HomeUiState())
+
+                Route.Transactions.route -> {
+                    TransactionScreen(
+                        onBackClick = {
+                            navController.popBackStack()
+                        }
+                    )
+                }
+
+                Route.Analysis.route -> {
+                    AnalysisScreen()
+                }
+
+                Route.Categories.route -> {
+                    CategoriesScreen()
+                }
+
+                else -> {
+                    HomeScreen(state = HomeUiState())
+                }
             }
         }
     }
