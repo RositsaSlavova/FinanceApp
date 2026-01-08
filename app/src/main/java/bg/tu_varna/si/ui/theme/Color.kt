@@ -5,6 +5,7 @@ import androidx.compose.ui.graphics.Color
 // Primary Colors (от прототипа)
 val FinGreen = Color(0xFF1DD1A1)        // Основен turquoise
 val FinGreenDark = Color(0xFF17B88E)    // По-тъмен turquoise за savings icon
+val FinGreenLight = Color(0xFF00D09E)   // Светло зелен за дати и някои dividers
 
 // Background Colors
 val FinBg = Color(0xFFE8F8F5)           // Светъл зелено-сив за долната част
@@ -18,8 +19,9 @@ val FinTextSecondary = Color(0x80000000) // 50% прозрачност
 
 // Accent Colors
 val FinExpenseBlue = Color(0xFF667EEA)   // За разходи (лилаво-синьо)
-val FinBlue = Color(0xFF4A90E2)          // За икони на транзакции
-val FinDarkBlue = Color(0xFF0066FF)      // За Rent икона
+val FinBlue = Color(0xFF4A90E2)          // За икони на транзакции (среден син)
+val FinBlueLight = Color(0xFF6BA3E8)     // Светъл син за Salary икона
+val FinDarkBlue = Color(0xFF0066FF)      // За Rent икона (тъмен син)
 
 // Success
 val FinGreenCheck = Color(0xFF1DB954)
