@@ -17,10 +17,9 @@ fun PlaceholderScreen(title: String) {
     }
 }
 
-@Composable fun LoginScreen() = PlaceholderScreen("Вход")
-@Composable fun TransactionsScreen() = PlaceholderScreen("Транзакции")
-@Composable fun AnalysisScreen() = PlaceholderScreen("Анализ")
-@Composable fun CategoriesScreen() = PlaceholderScreen("Категории")
-@Composable fun AddTransactionScreen() = PlaceholderScreen("Добави транзакция")
-@Composable fun BudgetScreen() = PlaceholderScreen("Бюджет")
-@Composable fun NotificationsScreen() = PlaceholderScreen("Известия")
+@Composable fun LoginScreen() = PlaceholderScreen("Login")
+@Composable fun TransactionsScreen() = PlaceholderScreen("Transactions")
+@Composable fun AnalysisScreen() = PlaceholderScreen("Analysis")
+@Composable fun CategoriesScreen() = PlaceholderScreen("Categories")
+@Composable fun AddTransactionScreen() = PlaceholderScreen("Add transaction")
+@Composable fun BudgetScreen() = PlaceholderScreen("Budget")
