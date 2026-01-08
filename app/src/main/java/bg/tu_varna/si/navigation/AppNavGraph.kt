@@ -1,10 +1,12 @@
 package bg.tu_varna.si.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -20,7 +22,7 @@ fun AppRoot() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Home.route // временно; после ще го върнем на Login
+        startDestination = Route.Home.route
     ) {
         composable(Route.Login.route) {
             LoginScreen()
@@ -35,7 +37,6 @@ fun AppRoot() {
         // Екрани извън bottom nav
         composable(Route.AddTransaction.route) { AddTransactionScreen() }
         composable(Route.Budget.route) { BudgetScreen() }
-        composable(Route.Notifications.route) { NotificationsScreen() }
     }
 }
 
@@ -47,43 +48,26 @@ private fun MainScaffold(navController: NavHostController) {
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                bottomNavItems.forEach { item ->
-                    val selected = currentDestination?.hierarchy?.any { it.route == item.route } == true
-                    NavigationBarItem(
-                        selected = selected,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(item.icon, contentDescription = item.label) },
-                        label = { Text(item.label) }
-                    )
+            ModernBottomBar(
+                currentRoute = route,
+                onNavigate = { destination ->
+                    navController.navigate(destination) {
+                        popUpTo(navController.graph.findStartDestination().id) {
+                            saveState = true
+                        }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-            }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(Route.AddTransaction.route) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Text("+", fontSize = 22.sp, fontWeight = FontWeight.Bold)
-            }
+            )
         }
+        // FAB е ПРЕМАХНАТ
     ) { padding ->
         Surface(modifier = Modifier.padding(padding)) {
             when (route) {
                 Route.Home.route -> {
                     HomeScreen(
-                        state = HomeUiState(amountsHidden = false),
-                        onNotificationsClick = { navController.navigate(Route.Notifications.route) },
-                        onRevealClick = { /* по-късно biometric */ }
+                        state = HomeUiState(amountsHidden = false)
                     )
                 }
                 Route.Transactions.route -> TransactionsScreen()
@@ -91,6 +75,44 @@ private fun MainScaffold(navController: NavHostController) {
                 Route.Categories.route -> CategoriesScreen()
                 else -> HomeScreen(state = HomeUiState())
             }
+        }
+    }
+}
+
+@Composable
+private fun ModernBottomBar(
+    currentRoute: String?,
+    onNavigate: (String) -> Unit
+) {
+    val turquoise = Color(0xFF1DD1A1)
+    val lightBg = Color(0xFFE8F8F5)
+
+    NavigationBar(
+        containerColor = lightBg,
+        tonalElevation = 0.dp,
+        modifier = Modifier
+    ) {
+        bottomNavItems.forEach { item ->
+            val selected = currentRoute == item.route
+
+            NavigationBarItem(
+                selected = selected,
+                onClick = { onNavigate(item.route) },
+                icon = {
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.label,
+                        modifier = Modifier.size(28.dp),  // По-големи икони
+                        tint = if (selected) turquoise else Color.Black.copy(alpha = 0.4f)
+                    )
+                },
+                // БЕЗ LABEL - махнато
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = turquoise,
+                    unselectedIconColor = Color.Black.copy(alpha = 0.4f),
+                    indicatorColor = Color.Transparent
+                )
+            )
         }
     }
 }
