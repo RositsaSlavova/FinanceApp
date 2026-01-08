@@ -30,7 +30,7 @@ import bg.tu_varna.si.R
 // --------- UI State ---------
 data class HomeUiState(
     val greetingTitle: String = "Hi, Welcome Back",
-    val greetingSubtitle: String = "Good Morning",
+    val greetingSubtitle: String = "Ready to save, Queen",
     val totalBalance: Double = 7783.00,
     val totalExpense: Double = 1187.40,
     val budgetLimit: Double = 20000.00,
@@ -60,7 +60,6 @@ enum class TxnIcon { WORK, CART, HOME }
 @Composable
 fun HomeScreen(
     state: HomeUiState = HomeUiState(),
-    onNotificationsClick: () -> Unit = {},
     onPeriodChange: (PeriodTab) -> Unit = {},
     onRevealClick: () -> Unit = {}
 ) {
@@ -77,7 +76,7 @@ fun HomeScreen(
             .verticalScroll(scrollState)
     ) {
         // Header
-        Header(state.greetingTitle, state.greetingSubtitle, onNotificationsClick)
+        Header(state.greetingTitle, state.greetingSubtitle)
 
         Spacer(Modifier.height(16.dp))
 
@@ -119,7 +118,7 @@ fun HomeScreen(
 
 // --------- Components ---------
 @Composable
-private fun Header(title: String, subtitle: String, onNotificationsClick: () -> Unit) {
+private fun Header(title: String, subtitle: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,22 +141,9 @@ private fun Header(title: String, subtitle: String, onNotificationsClick: () -> 
                 color = Color.Black.copy(alpha = 0.7f)
             )
         }
-
-        IconButton(
-            onClick = onNotificationsClick,
-            modifier = Modifier
-                .size(50.dp)
-                .background(Color.White, CircleShape)
-        ) {
-            Icon(
-                Icons.Outlined.Notifications,
-                contentDescription = "Notifications",
-                tint = Color.Black,
-                modifier = Modifier.size(26.dp)
-            )
         }
     }
-}
+
 
 @Composable
 private fun BalanceRow(
@@ -179,7 +165,7 @@ private fun BalanceRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    Icons.Outlined.ArrowUpward,
+                    painter = painterResource(id = R.drawable.ic_income),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
                     tint = Color.Black.copy(alpha = 0.6f)
@@ -214,7 +200,7 @@ private fun BalanceRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Icon(
-                    Icons.Outlined.ArrowDownward,
+                    painter = painterResource(id = R.drawable.ic_expense),
                     contentDescription = null,
                     modifier = Modifier.size(20.dp),
                     tint = Color.Black.copy(alpha = 0.6f)
@@ -360,7 +346,7 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        Icons.Outlined.DirectionsCar,
+                        painter = painterResource(id = R.drawable.ic_car),
                         contentDescription = null,
                         modifier = Modifier.size(44.dp),
                         tint = Color.Black
@@ -368,13 +354,7 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    "Savings",
-                    fontSize = 17.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                Text(
-                    "On Goals",
+                    "Savings On Goals",
                     fontSize = 13.sp,
                     color = Color.Black.copy(alpha = 0.6f)
                 )
@@ -432,7 +412,7 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Outlined.Restaurant,
+                        painter = painterResource(id = R.drawable.ic_food),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = Color.Black
@@ -554,9 +534,9 @@ private fun TransactionItem(tx: UiTransaction, hidden: Boolean) {
             ) {
                 Icon(
                     when (tx.icon) {
-                        TxnIcon.WORK -> Icons.Outlined.Payments
-                        TxnIcon.CART -> Icons.Outlined.ShoppingCart
-                        TxnIcon.HOME -> Icons.Outlined.Home
+                        TxnIcon.WORK -> painterResource(id = R.drawable.ic_salary)
+                        TxnIcon.CART -> painterResource(id = R.drawable.ic_groceries)
+                        TxnIcon.HOME -> painterResource(id = R.drawable.ic_rent)
                     },
                     contentDescription = null,
                     modifier = Modifier.size(26.dp),

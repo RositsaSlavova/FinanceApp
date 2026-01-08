@@ -37,7 +37,6 @@ fun AppRoot() {
         // Екрани извън bottom nav
         composable(Route.AddTransaction.route) { AddTransactionScreen() }
         composable(Route.Budget.route) { BudgetScreen() }
-        composable(Route.Notifications.route) { NotificationsScreen() }
     }
 }
 
@@ -68,8 +67,7 @@ private fun MainScaffold(navController: NavHostController) {
             when (route) {
                 Route.Home.route -> {
                     HomeScreen(
-                        state = HomeUiState(amountsHidden = false),
-                        onNotificationsClick = { navController.navigate(Route.Notifications.route) }
+                        state = HomeUiState(amountsHidden = false)
                     )
                 }
                 Route.Transactions.route -> TransactionsScreen()
