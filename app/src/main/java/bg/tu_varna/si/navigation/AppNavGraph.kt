@@ -1,19 +1,19 @@
 package bg.tu_varna.si.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.*
+import androidx.navigation.navArgument
 import bg.tu_varna.si.screens.*
 
 @Composable
@@ -22,58 +22,78 @@ fun AppRoot() {
 
     NavHost(
         navController = navController,
-        startDestination = Route.Home.route
+        startDestination = Route.Home.route // Директно към Home (обвит в Scaffold)
     ) {
-        composable(Route.Login.route) {
-            LoginScreen()
+        composable(Route.Login.route) { LoginScreen() }
+
+        // Всички основни екрани минават през MainScaffold
+        composable(Route.Home.route) { MainScaffold(navController, Route.Home.route) }
+        composable(Route.Transactions.route) { MainScaffold(navController, Route.Transactions.route) }
+        composable(Route.Analysis.route) { MainScaffold(navController, Route.Analysis.route) }
+        composable(Route.Categories.route) { MainScaffold(navController, Route.Categories.route) }
+
+        // ДЕТАЙЛИТЕ: Също обвити в MainScaffold, за да има Bottom Bar!
+        composable(
+            route = Route.CategoryDetail.route,
+            arguments = listOf(navArgument("categoryName") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val name = backStackEntry.arguments?.getString("categoryName") ?: ""
+            MainScaffold(navController, Route.CategoryDetail.route, name)
         }
-
-        // Екраните от bottom nav
-        composable(Route.Home.route) { MainScaffold(navController) }
-        composable(Route.Transactions.route) { MainScaffold(navController) }
-        composable(Route.Analysis.route) { MainScaffold(navController) }
-        composable(Route.Categories.route) { MainScaffold(navController) }
-
-        // Екрани извън bottom nav
-        composable(Route.AddTransaction.route) { AddTransactionScreen() }
-        composable(Route.Budget.route) { BudgetScreen() }
     }
 }
 
 @Composable
-private fun MainScaffold(navController: NavHostController) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = navBackStackEntry?.destination
-    val route = currentDestination?.route
-
+private fun MainScaffold(
+    navController: NavHostController,
+    currentRoute: String,
+    categoryName: String? = null
+) {
     Scaffold(
         bottomBar = {
             ModernBottomBar(
-                currentRoute = route,
+                currentRoute = currentRoute,
                 onNavigate = { destination ->
-                    navController.navigate(destination) {
-                        popUpTo(navController.graph.findStartDestination().id) {
-                            saveState = true
+                    // Навигираме само ако не сме вече на същия екран
+                    if (currentRoute != destination) {
+                        navController.navigate(destination) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            launchSingleTop = true
+                            restoreState = true
                         }
-                        launchSingleTop = true
-                        restoreState = true
                     }
                 }
             )
         }
-        // FAB е ПРЕМАХНАТ
     ) { padding ->
         Surface(modifier = Modifier.padding(padding)) {
-            when (route) {
-                Route.Home.route -> {
-                    HomeScreen(
-                        state = HomeUiState(amountsHidden = false)
+            // ТУК Е РЕШЕНИЕТО: Проверяваме конкретния маршрут без "else -> Home"
+            when {
+                currentRoute == Route.Home.route -> {
+                    HomeScreen(state = HomeUiState(amountsHidden = false))
+                }
+                currentRoute == Route.Transactions.route -> {
+                    TransactionScreen(onBackClick = { navController.popBackStack() })
+                }
+                currentRoute == Route.Analysis.route -> {
+                    AnalysisScreen()
+                }
+                currentRoute == Route.Categories.route -> {
+                    CategoriesScreen(
+                        onCategoryClick = { name ->
+                            navController.navigate(Route.CategoryDetail.createRoute(name))
+                        },
+                        onBackClick = { navController.popBackStack() }
                     )
                 }
-                Route.Transactions.route -> TransactionsScreen()
-                Route.Analysis.route -> AnalysisScreen()
-                Route.Categories.route -> CategoriesScreen()
-                else -> HomeScreen(state = HomeUiState())
+                currentRoute.startsWith("category_detail") -> {
+                    CategoryDetailScreen(
+                        categoryName = categoryName ?: "Category",
+                        onBackClick = { navController.popBackStack() }
+                    )
+                }
             }
         }
     }
@@ -89,10 +109,10 @@ private fun ModernBottomBar(
 
     NavigationBar(
         containerColor = lightBg,
-        tonalElevation = 0.dp,
-        modifier = Modifier
+        tonalElevation = 0.dp
     ) {
         bottomNavItems.forEach { item ->
+            // BottomBar иконата свети, ако сме на съответния маршрут
             val selected = currentRoute == item.route
 
             NavigationBarItem(
@@ -102,14 +122,11 @@ private fun ModernBottomBar(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        modifier = Modifier.size(28.dp),  // По-големи икони
+                        modifier = Modifier.size(28.dp),
                         tint = if (selected) turquoise else Color.Black.copy(alpha = 0.4f)
                     )
                 },
-                // БЕЗ LABEL - махнато
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = turquoise,
-                    unselectedIconColor = Color.Black.copy(alpha = 0.4f),
                     indicatorColor = Color.Transparent
                 )
             )
