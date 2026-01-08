@@ -1,6 +1,7 @@
 package bg.tu_varna.si.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -60,16 +61,8 @@ private fun MainScaffold(navController: NavHostController) {
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { navController.navigate(Route.AddTransaction.route) },
-                containerColor = Color(0xFF1DD1A1),
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Text("+", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.White)
-            }
         }
+        // FAB е ПРЕМАХНАТ
     ) { padding ->
         Surface(modifier = Modifier.padding(padding)) {
             when (route) {
@@ -93,9 +86,13 @@ private fun ModernBottomBar(
     currentRoute: String?,
     onNavigate: (String) -> Unit
 ) {
+    val turquoise = Color(0xFF1DD1A1)
+    val lightBg = Color(0xFFE8F8F5)
+
     NavigationBar(
-        containerColor = Color(0xFFE8F8F5),
-        tonalElevation = 0.dp
+        containerColor = lightBg,
+        tonalElevation = 0.dp,
+        modifier = Modifier
     ) {
         bottomNavItems.forEach { item ->
             val selected = currentRoute == item.route
@@ -107,12 +104,14 @@ private fun ModernBottomBar(
                     Icon(
                         imageVector = item.icon,
                         contentDescription = item.label,
-                        tint = if (selected) Color(0xFF1DD1A1) else Color.Black.copy(alpha = 0.5f)
+                        modifier = Modifier.size(28.dp),  // По-големи икони
+                        tint = if (selected) turquoise else Color.Black.copy(alpha = 0.4f)
                     )
                 },
+                // БЕЗ LABEL - махнато
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color(0xFF1DD1A1),
-                    unselectedIconColor = Color.Black.copy(alpha = 0.5f),
+                    selectedIconColor = turquoise,
+                    unselectedIconColor = Color.Black.copy(alpha = 0.4f),
                     indicatorColor = Color.Transparent
                 )
             )

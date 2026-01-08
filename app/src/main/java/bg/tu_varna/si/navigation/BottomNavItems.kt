@@ -12,7 +12,7 @@ data class BottomNavItem(
 
 val bottomNavItems = listOf(
     BottomNavItem(Route.Home.route, "Home", Icons.Outlined.Home),
-    BottomNavItem(Route.Transactions.route, "Stats", Icons.Outlined.BarChart),
-    BottomNavItem(Route.Analysis.route, "Transfer", Icons.Outlined.SwapHoriz),
-    BottomNavItem(Route.Categories.route, "More", Icons.Outlined.Layers),
+    BottomNavItem(Route.Analysis.route, "Analysis", Icons.Outlined.InsertChart),  // За analysis/stats
+    BottomNavItem(Route.Transactions.route, "Transactions", Icons.Outlined.SwapHoriz),  // За transfers
+    BottomNavItem(Route.Categories.route, "Categories", Icons.Outlined.Layers)  // За layers/categories
 )

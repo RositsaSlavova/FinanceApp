@@ -1,7 +1,6 @@
 package bg.tu_varna.si.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -19,11 +18,14 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import java.text.NumberFormat
 import java.util.Locale
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.res.painterResource
+import bg.tu_varna.si.R
 
 // --------- UI State ---------
 data class HomeUiState(
@@ -106,7 +108,7 @@ fun HomeScreen(
                 // Period Tabs
                 PeriodTabs(state.selectedPeriod, turquoise, lightBg, onPeriodChange)
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))  // ПО-МАЛКО spacing
 
                 // Transactions List
                 TransactionsList(state.recentTransactions, state.amountsHidden)
@@ -133,11 +135,11 @@ private fun Header(title: String, subtitle: String, onNotificationsClick: () -> 
                 fontWeight = FontWeight.Bold,
                 color = Color.Black
             )
-            Spacer(Modifier.height(4.dp))  // НАМАЛЕНО от 2dp на 4dp за по-естествен вид
+            Spacer(Modifier.height(4.dp))
             Text(
                 subtitle,
                 fontSize = 14.sp,
-                color = Color.Black.copy(alpha = 0.7f)  // По-тъмен за четливост
+                color = Color.Black.copy(alpha = 0.7f)
             )
         }
 
@@ -179,8 +181,8 @@ private fun BalanceRow(
                 Icon(
                     Icons.Outlined.ArrowUpward,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),  // По-голяма икона
-                    tint = Color.Black.copy(alpha = 0.6f)  // По-тъмна
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.Black.copy(alpha = 0.6f)
                 )
                 Text(
                     "Total Balance",
@@ -191,7 +193,7 @@ private fun BalanceRow(
             Spacer(Modifier.height(8.dp))
             Text(
                 formatMoney(totalBalance, "$", hidden),
-                fontSize = 28.sp,  // По-голям шрифт
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
             )
@@ -214,8 +216,8 @@ private fun BalanceRow(
                 Icon(
                     Icons.Outlined.ArrowDownward,
                     contentDescription = null,
-                    modifier = Modifier.size(20.dp),  // По-голяма икона
-                    tint = Color.Black.copy(alpha = 0.6f)  // По-тъмна
+                    modifier = Modifier.size(20.dp),
+                    tint = Color.Black.copy(alpha = 0.6f)
                 )
                 Text(
                     "Total Expense",
@@ -226,7 +228,7 @@ private fun BalanceRow(
             Spacer(Modifier.height(8.dp))
             Text(
                 "-${formatMoney(totalExpense, "$", hidden)}",
-                fontSize = 28.sp,  // По-голям шрифт
+                fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color(0xFF667EEA)
             )
@@ -263,7 +265,7 @@ private fun ProgressSection(
                     .background(Color.Black),
                 contentAlignment = Alignment.Center
             ) {
-                if (percent > 15) {  // Показвай процента само ако има място
+                if (percent > 15) {
                     Text(
                         "$percent%",
                         fontSize = 14.sp,
@@ -300,7 +302,7 @@ private fun ProgressSection(
             Icon(
                 Icons.Outlined.CheckBox,
                 contentDescription = null,
-                modifier = Modifier.size(18.dp),  // По-голямо тикче
+                modifier = Modifier.size(18.dp),
                 tint = Color.Black
             )
             Text(
@@ -339,7 +341,6 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                         .size(80.dp)
                         .drawBehind {
                             val strokeWidth = 8.dp.toPx()
-                            // Рисуваме първата половина (от 90° до 270°)
                             drawArc(
                                 color = Color.White,
                                 startAngle = 90f,
@@ -347,7 +348,6 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                                 useCenter = false,
                                 style = Stroke(width = strokeWidth, cap = StrokeCap.Round)
                             )
-                            // Рисуваме втората половина (от 270° до 90°)
                             drawArc(
                                 color = Color(0xFF667EEA),
                                 startAngle = 270f,
@@ -388,19 +388,19 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                     .background(Color.White.copy(alpha = 0.5f))
             )
 
-            // Right - Stats (икона ВЛЯВО, текст+сума ВДЯСНО)
+            // Right - Stats
             Column(
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.SpaceEvenly
             ) {
-                // Revenue - икона вляво, текст и сума вдясно
+                // Revenue
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Icon(
-                        Icons.Outlined.Inventory2,
+                        painter = painterResource(id = R.drawable.ic_salary),
                         contentDescription = null,
                         modifier = Modifier.size(40.dp),
                         tint = Color.Black
@@ -422,15 +422,10 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                 }
 
                 Spacer(Modifier.height(16.dp))
-
-                Divider(
-                    color = Color.White.copy(alpha = 0.5f),
-                    thickness = 1.dp
-                )
-
+                Divider(color = Color.White.copy(alpha = 0.5f), thickness = 1.dp)
                 Spacer(Modifier.height(16.dp))
 
-                // Food - икона вляво, текст и сума вдясно
+                // Food
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -450,10 +445,10 @@ private fun WeeklySavingsCard(hidden: Boolean) {
                         )
                         Spacer(Modifier.height(0.5.dp))
                         Text(
-                            "-${formatMoney(100.0, "$", hidden)}",  // С МИНУС
+                            "-${formatMoney(100.0, "$", hidden)}",
                             fontSize = 18.sp,
                             fontWeight = FontWeight.Bold,
-                            color = Color(0xFF667EEA)  // Светло зелен цвят
+                            color = Color(0xFF667EEA)
                         )
                     }
                 }
@@ -472,33 +467,40 @@ private fun PeriodTabs(
     var selectedTab by remember { mutableStateOf(2) }
     val tabs = listOf("Daily", "Weekly", "Monthly")
 
-    Row(
+    // БЯЛ BACKGROUND КАТО КАРТА
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp)
-            .clip(RoundedCornerShape(30.dp))
-            .background(Color.White)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .padding(horizontal = 20.dp),
+        shape = RoundedCornerShape(30.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        tabs.forEachIndexed { index, title ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(26.dp))
-                    .background(
-                        if (selectedTab == index) turquoise else Color.Transparent
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            tabs.forEachIndexed { index, title ->
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(RoundedCornerShape(26.dp))
+                        .background(
+                            if (selectedTab == index) turquoise else Color.Transparent
+                        )
+                        .clickable { selectedTab = index }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        title,
+                        fontSize = 14.sp,
+                        fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
+                        color = if (selectedTab == index) Color.Black else Color.Black.copy(alpha = 0.5f)
                     )
-                    .clickable { selectedTab = index }
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    title,
-                    fontSize = 14.sp,
-                    fontWeight = if (selectedTab == index) FontWeight.SemiBold else FontWeight.Normal,
-                    color = if (selectedTab == index) Color.Black else Color.Black.copy(alpha = 0.5f)
-                )
+                }
             }
         }
     }
@@ -512,8 +514,8 @@ private fun TransactionsList(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 20.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+            .padding(horizontal = 0.dp),  // БЕЗ horizontal padding - директно на background
+        verticalArrangement = Arrangement.spacedBy(8.dp)  // ПО-МАЛКО spacing
     ) {
         transactions.forEach { tx ->
             TransactionItem(tx, hidden)
@@ -523,30 +525,30 @@ private fun TransactionsList(
 
 @Composable
 private fun TransactionItem(tx: UiTransaction, hidden: Boolean) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    // БЕЗ CARD - директно на background-а
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 20.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Icon - По-голяма кръгла икона
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .size(40.dp),
+            contentAlignment = Alignment.Center
         ) {
-            // Icon
             Box(
                 modifier = Modifier
-                    .size(52.dp)
+                    .fillMaxSize()
                     .background(
                         when (tx.icon) {
-                            TxnIcon.WORK -> Color(0xFF4A90E2)
-                            TxnIcon.CART -> Color(0xFF4A90E2)
-                            TxnIcon.HOME -> Color(0xFF0066FF)
+                            TxnIcon.WORK -> Color(0xFF6BA3E8)  // Светъл син
+                            TxnIcon.CART -> Color(0xFF4A90E2)  // Среден син
+                            TxnIcon.HOME -> Color(0xFF0066FF)  // Тъмен син
                         },
-                        RoundedCornerShape(14.dp)
+                        CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -557,44 +559,65 @@ private fun TransactionItem(tx: UiTransaction, hidden: Boolean) {
                         TxnIcon.HOME -> Icons.Outlined.Home
                     },
                     contentDescription = null,
-                    modifier = Modifier.size(28.dp),
+                    modifier = Modifier.size(26.dp),
                     tint = Color.White
                 )
             }
-
-            // Title and date
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    tx.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color.Black
-                )
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    tx.subtitle,
-                    fontSize = 12.sp,
-                    color = Color.Black.copy(alpha = 0.5f)
-                )
-            }
-
-            // Tag and amount
-            Column(horizontalAlignment = Alignment.End) {
-                Text(
-                    tx.tag,
-                    fontSize = 12.sp,
-                    color = Color.Black.copy(alpha = 0.5f)
-                )
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    if (tx.amount < 0) "-${formatMoney(kotlin.math.abs(tx.amount), "$", hidden)}"
-                    else formatMoney(tx.amount, "$", hidden),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-            }
         }
+
+        // Title and Date
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(
+                tx.title,
+                fontSize = 13.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            )
+            //Spacer(Modifier.height(1.dp))
+            Text(
+                tx.subtitle,
+                fontSize = 8.sp,
+                color = Color(0xFF00D09E)  // Син
+            )
+        }
+
+        // ПЪРВИ DIVIDER (turquoise)
+        Box(
+            modifier = Modifier
+                .width(1.5.dp)
+                .height(45.dp)
+                .background(Color(0xFF1DD1A1))
+        )
+
+        // Category (центрирана между dividers)
+        Text(
+            tx.tag,
+            fontSize = 10.sp,
+            color = Color.Black,
+            modifier = Modifier.widthIn(min = 70.dp),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+
+        // ВТОРИ DIVIDER (turquoise)
+        Box(
+            modifier = Modifier
+                .width(1.5.dp)
+                .height(45.dp)
+                .background(Color(0xFF00D09E))
+        )
+
+        // Amount
+        Text(
+            if (tx.amount < 0) "-${formatMoney(kotlin.math.abs(tx.amount), "$", hidden)}"
+            else formatMoney(tx.amount, "$", hidden),
+            fontSize = 14.sp,
+            fontWeight = FontWeight.Bold,
+            color = if (tx.amount < 0) Color(0xFF4A90E2) else Color.Black,  // НЕГАТИВНИ СА СИНИ!
+            modifier = Modifier.widthIn(min = 90.dp),
+            textAlign = TextAlign.End
+        )
     }
 }
 
